@@ -1,6 +1,5 @@
 package com.haleluque.rest.restful_web_services.socialMedia.data;
 
-import com.haleluque.rest.restful_web_services.socialMedia.model.User;
 import com.haleluque.rest.restful_web_services.socialMedia.model.UserPlain;
 import org.springframework.stereotype.Component;
 

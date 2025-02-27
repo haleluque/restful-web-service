@@ -7,9 +7,14 @@ import java.util.List;
 
 public interface UserService {
     List<User> findAll();
+
     User save(User user);
+
     User findById(int id);
+
     void deleteById(int id);
+
     List<Post> retrievePostsForUser(int id);
+
     User addPost(int id, Post post);
 }

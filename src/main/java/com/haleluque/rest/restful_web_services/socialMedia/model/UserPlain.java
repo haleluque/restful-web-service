@@ -7,9 +7,15 @@ import jakarta.persistence.Id;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class UserPlain {
 
     @Id
@@ -24,37 +30,6 @@ public class UserPlain {
     @Past(message = "Birth Date should be in the past")
     @JsonProperty("birth_date")
     private LocalDate birthDate;
-
-    public UserPlain(Integer id, String name, LocalDate birthDate) {
-        super();
-        this.id = id;
-        this.name = name;
-        this.birthDate = birthDate;
-    }
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public LocalDate getBirthDate() {
-        return birthDate;
-    }
-
-    public void setBirthDate(LocalDate birthDate) {
-        this.birthDate = birthDate;
-    }
 
     @Override
     public String toString() {
