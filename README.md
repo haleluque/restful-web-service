@@ -21,3 +21,4 @@ Spring boot project with restful web services examples:
 - Spring Boot Actuator example (http://localhost:8080/actuator)
 - HAL Explorer example with Spring boot HAL Explorer (http://localhost:8080/explorer/index.html#uri=/)
 - JPA and Hibernate Example with PostgresSQL
+- Basic Authentication with Spring Security
