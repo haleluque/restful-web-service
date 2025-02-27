@@ -1,79 +1,62 @@
 package com.haleluque.rest.restful_web_services.socialMedia.controllers;
 
+import com.haleluque.rest.restful_web_services.socialMedia.model.Post;
 import com.haleluque.rest.restful_web_services.socialMedia.model.User;
-import com.haleluque.rest.restful_web_services.socialMedia.data.UserDaoService;
-import com.haleluque.rest.restful_web_services.socialMedia.exception.UserNotFoundException;
+import com.haleluque.rest.restful_web_services.socialMedia.service.UserService;
 import jakarta.validation.Valid;
-import org.springframework.context.MessageSource;
-import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.hateoas.EntityModel;
-import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
-import java.util.Locale;
-
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
+@RequestMapping("/users/v2")
 public class UserController {
-    private final UserDaoService service;
-    private final MessageSource messageSource;
 
-    public UserController(UserDaoService service, MessageSource messageSource) {
-        this.service = service;
-        this.messageSource = messageSource;
-    }
+    @Autowired
+    private UserService userService;
 
-    @GetMapping("/users")
+    @GetMapping
     public List<User> retrieveAllUsers() {
-        return service.findAll();
+        return userService.findAll();
     }
 
-    /**
-     * HATEOAS example
-     *
-     * @param id user id
-     * @return User and link to the users page
-     */
-    @GetMapping("/users/{id}")
-    public EntityModel<User> retrieveUser(@PathVariable int id) {
-        User user = service.findOne(id);
-        if (user == null)
-            throw new UserNotFoundException("id:" + id);
-
-        EntityModel<User> userEntityModel = EntityModel.of(user);
-        //create a link to a specific method in the controller
-        WebMvcLinkBuilder linkBuilder = linkTo(methodOn(this.getClass()).retrieveAllUsers());
-        userEntityModel.add(linkBuilder.withRel("all-users"));
-        return userEntityModel;
+    @GetMapping("/user/{id}/posts")
+    public ResponseEntity<List<Post>> retrievePostsForUser(@PathVariable int id) {
+        List<Post> posts = userService.retrievePostsForUser(id);
+        return new ResponseEntity<>(posts, HttpStatus.OK);
     }
 
-    @PostMapping("/users")
+    @GetMapping("/{id}")
+    public ResponseEntity<User> retrieveUser(@PathVariable int id) {
+        User user = userService.findById(id);
+        return new ResponseEntity<>(user, HttpStatus.OK);
+    }
+
+    @PostMapping
     public ResponseEntity<User> createUser(@Valid @RequestBody User user) {
-        User savedUser = service.save(user);
+        User savedUser = userService.save(user);
+        return new ResponseEntity<>(savedUser, HttpStatus.CREATED);
+    }
 
-        //automatic redirects to the url of get the new user by id
-        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
-                .path("/{id}")
-                .buildAndExpand(savedUser.getId())
+    @PostMapping("/user/{id}/posts")
+    public ResponseEntity<Object> addPost(@PathVariable int id, @Valid @RequestBody Post post) {
+        User user = userService.addPost(id, post);
+        // Build the URI for the created resource using a different base URI
+        URI location = ServletUriComponentsBuilder.fromCurrentContextPath()
+                .path("/users/v2/{id}")
+                .buildAndExpand(user.getId())
                 .toUri();
 
         return ResponseEntity.created(location).build();
     }
 
-    @DeleteMapping("/users/{id}")
+    @DeleteMapping("/{id}")
     public void deleteUser(@PathVariable int id) {
-        service.deleteById(id);
-    }
-
-    @GetMapping(path = "/hello-world-internationalized")
-    public String helloWorldInternationalized() {
-        Locale locale = LocaleContextHolder.getLocale();
-        return messageSource.getMessage("good.morning.message", null, "Default Message", locale );
+        userService.deleteById(id);
     }
 }
