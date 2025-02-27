@@ -6,6 +6,8 @@ import com.haleluque.rest.restful_web_services.socialMedia.exception.UserNotFoun
 import jakarta.validation.Valid;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -13,6 +15,9 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.net.URI;
 import java.util.List;
 import java.util.Locale;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
 public class UserController {
@@ -29,12 +34,23 @@ public class UserController {
         return service.findAll();
     }
 
+    /**
+     * HATEOAS example
+     *
+     * @param id user id
+     * @return User and link to the users page
+     */
     @GetMapping("/users/{id}")
-    public User retrieveUser(@PathVariable int id) {
+    public EntityModel<User> retrieveUser(@PathVariable int id) {
         User user = service.findOne(id);
         if (user == null)
             throw new UserNotFoundException("id:" + id);
-        return user;
+
+        EntityModel<User> userEntityModel = EntityModel.of(user);
+        //create a link to a specific method in the controller
+        WebMvcLinkBuilder linkBuilder = linkTo(methodOn(this.getClass()).retrieveAllUsers());
+        userEntityModel.add(linkBuilder.withRel("all-users"));
+        return userEntityModel;
     }
 
     @PostMapping("/users")
